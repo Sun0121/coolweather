@@ -13,7 +13,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getString("weatheer", null) != null) {
+        /**
+         * 不为空说明已经请求过数据了，不用重新选择城市
+         */
+        if (prefs.getString("weather", null) != null) {
             Intent intent = new Intent(this, WeatherActivity.class);
             startActivity(intent);
             finish();

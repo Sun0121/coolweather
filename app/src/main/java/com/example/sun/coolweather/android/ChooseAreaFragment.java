@@ -90,8 +90,8 @@ public class ChooseAreaFragment extends Fragment {
                     qureyCounties();
                 }else if (currentLevel == LEVEL_COUNTY) {
                     String weatherId = countyList.get(position).getWeatherId();
-                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
-                    intent.putExtra("weatherId",weatherId);
+                    Intent intent = new Intent(getActivity(), WeatherActivity.class);             //指明由哪个活动跳转到哪个活动
+                    intent.putExtra("weather_id",weatherId);                              //将weatherId传送给过去
                     startActivity(intent);
                     getActivity().finish();
                 }
@@ -146,7 +146,7 @@ public class ChooseAreaFragment extends Fragment {
             currentLevel = LEVEL_CITY;
         } else {
             int provinceCode = selectedProvince.getProvinceCode();
-            String address = "http://guolin.tech/api/china" + provinceCode;
+            String address = "http://guolin.tech/api/china/" + provinceCode;
             queryFromServer(address,"city");
         }
     }
@@ -168,7 +168,7 @@ public class ChooseAreaFragment extends Fragment {
         }else {
             int provinceCode = selectedProvince.getProvinceCode();
             int cityCode = selectedCity.getCityCode();
-            String address = "http://guolin.tech/api/china" + provinceCode + "/" + cityCode;
+            String address = "http://guolin.tech/api/china/" + provinceCode + "/" + cityCode;
             queryFromServer(address,"county");
         }
     }
