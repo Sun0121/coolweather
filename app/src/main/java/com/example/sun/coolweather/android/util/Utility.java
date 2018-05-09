@@ -12,6 +12,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Utility {
     /**
      *  解析和处理服务器返回的json数据
@@ -87,6 +90,24 @@ public class Utility {
         }catch (Exception e) {
             e.printStackTrace();
 
+        }
+        return null;
+    }
+
+    public static Map<String,String> handleLocationResponse(String str) {
+        Map<String,String> map = null;
+        if(str!=null){
+            int lngStart = str.indexOf("lng\":");
+            int lngEnd = str.indexOf(",\"lat");
+            int latEnd = str.indexOf("},\"precise");
+            if(lngStart > 0 && lngEnd > 0 && latEnd > 0){
+                String lng = str.substring(lngStart+5, lngEnd);
+                String lat = str.substring(lngEnd+7, latEnd);
+                map = new HashMap<String,String>();
+                map.put("lng", lng);
+                map.put("lat", lat);
+                return map;
+            }
         }
         return null;
     }

@@ -1,5 +1,6 @@
 package com.example.sun.coolweather.android;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -26,14 +27,21 @@ import com.example.sun.coolweather.android.util.HttpUtil;
 import com.example.sun.coolweather.android.util.Utility;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
+import static com.example.sun.coolweather.android.ChooseAreaFragment.selectedCity;
+import static com.example.sun.coolweather.android.ChooseAreaFragment.selectedProvince;
+
 public class WeatherActivity extends AppCompatActivity {
 
     public DrawerLayout drawerLayout;
+
+    public Button showMap;
 
     private Button navButton;
 
@@ -73,6 +81,7 @@ public class WeatherActivity extends AppCompatActivity {
         }
         setContentView(R.layout.activity_weather);
         // 初始化各控件
+        showMap = (Button) findViewById(R.id.title_map);
         bingPicImg = (ImageView)findViewById(R.id.bing_pic_img);
         weatherLayout = (ScrollView) findViewById(R.id.weather_layout);
         titleCity = (TextView) findViewById(R.id.title_city);
@@ -89,6 +98,57 @@ public class WeatherActivity extends AppCompatActivity {
         swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
         navButton = (Button)findViewById(R.id.nav_button);
         drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
+
+        showMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String cnAddress = selectedProvince.getProvinceName() + selectedCity.getCityName() + titleCity.getText().toString();
+
+                try{
+                    cnAddress = URLEncoder.encode(cnAddress, "UTF-8");          //将地址转换成utf-8的16进制
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
+                String address = "http://api.map.baidu.com/geocoder/v2/?address="
+                        + cnAddress +"&output=json&ak="+ "zT7GXPFwZc2aDnkyQAbrGxk4NBITl9bG";
+
+                HttpUtil.sendOkHttpRequest(address, new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        e.printStackTrace();;
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(WeatherActivity.this, "获取地区经纬度失败",Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        String responseText = response.body().string();
+                        final Map<String,String> mapData = Utility.handleLocationResponse(responseText);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mapData != null) {
+                                    String lng = mapData.get("lng");
+                                    String lat = mapData.get("lat");
+                                    Intent intent = new Intent(WeatherActivity.this, MapActivity.class);
+                                    intent.putExtra("lng",lng);
+                                    intent.putExtra("lat",lat);
+                                    startActivity(intent);
+                                } else {
+                                    Toast.makeText(WeatherActivity.this, "获取地区经纬度失败",Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    }
+                });
+
+            }
+        });
 
         navButton.setOnClickListener(new View.OnClickListener() {
             @Override
